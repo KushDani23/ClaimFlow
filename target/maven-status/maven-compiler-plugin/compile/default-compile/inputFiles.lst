@@ -1,25 +1,35 @@
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\authentication\controller\AuthController.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\authentication\dto\AuthResponse.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\authentication\dto\LoginRequest.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\authentication\dto\RegisterRequest.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\authentication\service\AuthService.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\common\constants\AppConstants.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\common\exception\DuplicateResourceException.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\common\exception\FileUploadException.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\common\exception\GlobalExceptionHandler.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\common\exception\InvalidStateTransitionException.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\common\exception\ResourceNotFoundException.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\common\response\ApiResponse.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\config\JwtConfig.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\config\SecurityConfig.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\config\SwaggerConfig.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\InsuranceClaimApplication.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\security\CustomUserDetailsService.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\security\JwtAuthenticationFilter.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\security\JwtService.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\user\controller\UserController.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\user\dto\UserProfileResponse.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\user\entity\Role.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\user\entity\User.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\user\repository\UserRepository.java
-D:\Personal\Insurance Claim Processing System\src\main\java\com\company\icps\user\service\UserService.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\authentication\controller\AuthController.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\authentication\dto\AuthResponse.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\authentication\dto\LoginRequest.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\authentication\dto\RegisterRequest.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\authentication\service\AuthService.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\controller\ClaimController.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\dto\ClaimResponse.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\dto\CreateClaimRequest.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\dto\UpdateClaimRequest.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\entity\Claim.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\entity\ClaimStatus.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\entity\ClaimType.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\mapper\ClaimMapper.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\repository\ClaimRepository.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\service\ClaimService.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\constants\AppConstants.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\exception\DuplicateResourceException.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\exception\FileUploadException.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\exception\GlobalExceptionHandler.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\exception\InvalidStateTransitionException.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\exception\ResourceNotFoundException.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\response\ApiResponse.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\config\JwtConfig.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\config\SecurityConfig.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\config\SwaggerConfig.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\InsuranceClaimApplication.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\security\CustomUserDetailsService.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\security\JwtAuthenticationFilter.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\security\JwtService.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\user\controller\UserController.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\user\dto\UserProfileResponse.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\user\entity\Role.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\user\entity\User.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\user\repository\UserRepository.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\user\service\UserService.java
