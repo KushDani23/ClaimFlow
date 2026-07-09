@@ -23,6 +23,12 @@ D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\response\ApiResponse
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\config\JwtConfig.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\config\SecurityConfig.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\config\SwaggerConfig.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\controller\DocumentController.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\dto\DocumentResponse.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\entity\ClaimDocument.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\repository\DocumentRepository.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\service\DocumentService.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\service\FileStorageService.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\InsuranceClaimApplication.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\security\CustomUserDetailsService.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\security\JwtAuthenticationFilter.java

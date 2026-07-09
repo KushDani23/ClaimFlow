@@ -6,7 +6,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/icps_db
     username: postgres
-    password: postgres
+    password: 12345
     driver-class-name: org.postgresql.Driver
 
   # JPA / Hibernate Configuration
@@ -42,3 +42,8 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operations-sorter: method
+
+# File Storage Configuration
+file:
+  upload-dir: ./uploads
+
