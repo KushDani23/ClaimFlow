@@ -25,6 +25,9 @@ public class ClaimResponse {
     private String policyNumber;
     private String customerName;
     private String customerEmail;
+    private String assignedAgent;
+    private String agentNotes;
+    private String investigationNotes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

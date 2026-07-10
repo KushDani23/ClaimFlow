@@ -51,8 +51,15 @@ public class Claim {
     @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_agent_id")
+    private User assignedAgent;
+
     @Column(columnDefinition = "TEXT")
     private String agentNotes;
+
+    @Column(columnDefinition = "TEXT")
+    private String investigationNotes;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

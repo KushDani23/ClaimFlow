@@ -19,6 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.Set;
+
+import static com.company.icps.claim.entity.ClaimStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,20 @@ public class ClaimService {
     private final ClaimRepository claimRepository;
     private final UserRepository userRepository;
 
+    // Valid state transitions: from → set of allowed targets
+    private static final Map<ClaimStatus, Set<ClaimStatus>> VALID_TRANSITIONS = Map.of(
+            DRAFT, Set.of(SUBMITTED),
+            SUBMITTED, Set.of(UNDER_REVIEW),
+            UNDER_REVIEW, Set.of(APPROVED, REJECTED, INVESTIGATION_REQUIRED),
+            INVESTIGATION_REQUIRED, Set.of(UNDER_INVESTIGATION),
+            UNDER_INVESTIGATION, Set.of(INVESTIGATION_COMPLETED),
+            INVESTIGATION_COMPLETED, Set.of(APPROVED, REJECTED),
+            APPROVED, Set.of(CLOSED),
+            REJECTED, Set.of(CLOSED)
+    );
+
+    // ---- Customer Operations ----
+
     @Transactional
     public ClaimResponse createClaim(CreateClaimRequest request, String email) {
         User customer = getUserByEmail(email);
@@ -34,7 +52,7 @@ public class ClaimService {
         Claim claim = Claim.builder()
                 .claimNumber(generateClaimNumber())
                 .claimType(request.getClaimType())
-                .status(ClaimStatus.DRAFT)
+                .status(DRAFT)
                 .description(request.getDescription())
                 .incidentDate(request.getIncidentDate())
                 .claimAmount(request.getClaimAmount())
@@ -85,20 +103,55 @@ public class ClaimService {
     public ClaimResponse submitClaim(Long claimId, String email) {
         Claim claim = getClaimEntity(claimId);
         validateOwnership(claim, email);
-
-        if (claim.getStatus() != ClaimStatus.DRAFT) {
-            throw new InvalidStateTransitionException(claim.getStatus().name(), ClaimStatus.SUBMITTED.name());
-        }
-
-        claim.setStatus(ClaimStatus.SUBMITTED);
-        return toResponse(claimRepository.save(claim));
+        return transitionClaim(claim, SUBMITTED, null, null);
     }
 
-    // ---- Helpers (also used by DocumentService) ----
+    // ---- Workflow Operations (Agent / Investigator / Supervisor) ----
+
+    @Transactional
+    public ClaimResponse transitionClaim(Long claimId, ClaimStatus targetStatus, String notes, String email) {
+        Claim claim = getClaimEntity(claimId);
+        User actor = getUserByEmail(email);
+
+        // Assign the actor as the agent if not already assigned
+        if (claim.getAssignedAgent() == null) {
+            claim.setAssignedAgent(actor);
+        }
+
+        // Store notes in the appropriate field based on target status
+        if (notes != null && !notes.isBlank()) {
+            if (targetStatus == INVESTIGATION_COMPLETED) {
+                claim.setInvestigationNotes(notes);
+            } else {
+                claim.setAgentNotes(notes);
+            }
+        }
+
+        return transitionClaim(claim, targetStatus, notes, actor);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ClaimResponse> getClaimsByStatus(ClaimStatus status, Pageable pageable) {
+        return claimRepository.findByStatus(status, pageable).map(this::toResponse);
+    }
+
+    // ---- Helpers ----
 
     public Claim getClaimEntity(Long claimId) {
         return claimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Claim", "id", claimId));
+    }
+
+    private ClaimResponse transitionClaim(Claim claim, ClaimStatus targetStatus, String notes, User actor) {
+        ClaimStatus currentStatus = claim.getStatus();
+
+        Set<ClaimStatus> allowed = VALID_TRANSITIONS.get(currentStatus);
+        if (allowed == null || !allowed.contains(targetStatus)) {
+            throw new InvalidStateTransitionException(currentStatus.name(), targetStatus.name());
+        }
+
+        claim.setStatus(targetStatus);
+        return toResponse(claimRepository.save(claim));
     }
 
     private void validateOwnership(Claim claim, String email) {
@@ -108,7 +161,7 @@ public class ClaimService {
     }
 
     private void validateDraftStatus(Claim claim) {
-        if (claim.getStatus() != ClaimStatus.DRAFT) {
+        if (claim.getStatus() != DRAFT) {
             throw new InvalidStateTransitionException(
                     "Only DRAFT claims can be modified. Current status: " + claim.getStatus().name());
         }
@@ -125,10 +178,11 @@ public class ClaimService {
         return String.format("CLM-%s-%05d", datePart, count);
     }
 
-    // ---- Mapping (replaces separate ClaimMapper class) ----
+    // ---- Mapping ----
 
     private ClaimResponse toResponse(Claim claim) {
         User customer = claim.getCustomer();
+        User agent = claim.getAssignedAgent();
         return ClaimResponse.builder()
                 .id(claim.getId())
                 .claimNumber(claim.getClaimNumber())
@@ -140,6 +194,9 @@ public class ClaimService {
                 .policyNumber(claim.getPolicyNumber())
                 .customerName(customer.getFirstName() + " " + customer.getLastName())
                 .customerEmail(customer.getEmail())
+                .assignedAgent(agent != null ? agent.getEmail() : null)
+                .agentNotes(claim.getAgentNotes())
+                .investigationNotes(claim.getInvestigationNotes())
                 .createdAt(claim.getCreatedAt())
                 .updatedAt(claim.getUpdatedAt())
                 .build();

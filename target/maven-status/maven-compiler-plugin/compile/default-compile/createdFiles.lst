@@ -10,6 +10,7 @@ com\company\icps\claim\entity\ClaimStatus.class
 com\company\icps\common\exception\ResourceNotFoundException.class
 com\company\icps\user\entity\User$UserBuilder.class
 com\company\icps\user\dto\UserProfileResponse.class
+com\company\icps\claim\controller\WorkflowController.class
 com\company\icps\document\entity\ClaimDocument$ClaimDocumentBuilder.class
 com\company\icps\user\entity\Role.class
 com\company\icps\document\dto\DocumentResponse$DocumentResponseBuilder.class
@@ -47,6 +48,7 @@ com\company\icps\security\JwtService.class
 com\company\icps\document\controller\DocumentController.class
 com\company\icps\authentication\controller\AuthController.class
 com\company\icps\common\exception\GlobalExceptionHandler.class
+com\company\icps\claim\dto\WorkflowActionRequest.class
 com\company\icps\authentication\dto\AuthResponse.class
 com\company\icps\authentication\dto\LoginRequest$LoginRequestBuilder.class
 com\company\icps\security\CustomUserDetailsService.class
