@@ -10,7 +10,6 @@ D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\dto\UpdateClaimReques
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\entity\Claim.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\entity\ClaimStatus.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\entity\ClaimType.java
-D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\mapper\ClaimMapper.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\repository\ClaimRepository.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\claim\service\ClaimService.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\common\constants\AppConstants.java

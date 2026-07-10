@@ -18,37 +18,27 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // ---- 404 ----
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(ResourceNotFoundException ex) {
-        ApiResponse<Object> response = ApiResponse.error(ex.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    // ---- 409 ----
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ApiResponse<Object>> handleDuplicateResource(DuplicateResourceException ex) {
-        ApiResponse<Object> response = ApiResponse.error(ex.getMessage(), HttpStatus.CONFLICT.value());
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        return buildResponse(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(InvalidStateTransitionException.class)
-    public ResponseEntity<ApiResponse<Object>> handleInvalidStateTransition(InvalidStateTransitionException ex) {
-        ApiResponse<Object> response = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(FileUploadException.class)
-    public ResponseEntity<ApiResponse<Object>> handleFileUpload(FileUploadException ex) {
-        ApiResponse<Object> response = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    // ---- 400 ----
+    @ExceptionHandler({InvalidStateTransitionException.class, FileUploadException.class, IllegalArgumentException.class})
+    public ResponseEntity<ApiResponse<Object>> handleBadRequest(RuntimeException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ApiResponse<Object>> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
-        ApiResponse<Object> response = ApiResponse.error(
-                "File size exceeds maximum allowed size of 10MB",
-                HttpStatus.BAD_REQUEST.value()
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return buildResponse("File size exceeds maximum allowed size of 10MB", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -56,8 +46,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            errors.put(fieldName, error.getDefaultMessage());
         });
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .success(false)
@@ -68,45 +57,31 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    // ---- 401 ----
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Object>> handleBadCredentials(BadCredentialsException ex) {
-        ApiResponse<Object> response = ApiResponse.error(
-                "Invalid email or password",
-                HttpStatus.UNAUTHORIZED.value()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return buildResponse("Invalid email or password", HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Object>> handleAuthentication(AuthenticationException ex) {
-        ApiResponse<Object> response = ApiResponse.error(
-                "Authentication failed: " + ex.getMessage(),
-                HttpStatus.UNAUTHORIZED.value()
-        );
-        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        return buildResponse("Authentication failed: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
+    // ---- 403 ----
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Object>> handleAccessDenied(AccessDeniedException ex) {
-        ApiResponse<Object> response = ApiResponse.error(
-                "You do not have permission to perform this action",
-                HttpStatus.FORBIDDEN.value()
-        );
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        return buildResponse("You do not have permission to perform this action", HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Object>> handleIllegalArgument(IllegalArgumentException ex) {
-        ApiResponse<Object> response = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
+    // ---- 500 (catch-all) ----
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
-        ApiResponse<Object> response = ApiResponse.error(
-                "An unexpected error occurred: " + ex.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value()
-        );
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildResponse("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // ---- Helper: eliminates repetitive ApiResponse.error() + new ResponseEntity<>() ----
+    private ResponseEntity<ApiResponse<Object>> buildResponse(String message, HttpStatus status) {
+        return new ResponseEntity<>(ApiResponse.error(message, status.value()), status);
     }
 }

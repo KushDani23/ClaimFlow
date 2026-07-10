@@ -33,7 +33,6 @@ com\company\icps\common\exception\InvalidStateTransitionException.class
 com\company\icps\document\repository\DocumentRepository.class
 com\company\icps\authentication\dto\LoginRequest.class
 com\company\icps\claim\dto\ClaimResponse.class
-com\company\icps\claim\mapper\ClaimMapper.class
 com\company\icps\user\service\UserService.class
 com\company\icps\authentication\service\AuthService.class
 com\company\icps\claim\controller\ClaimController.class
