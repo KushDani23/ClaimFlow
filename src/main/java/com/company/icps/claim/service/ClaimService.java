@@ -6,6 +6,9 @@ import com.company.icps.claim.dto.UpdateClaimRequest;
 import com.company.icps.claim.entity.Claim;
 import com.company.icps.claim.entity.ClaimStatus;
 import com.company.icps.claim.repository.ClaimRepository;
+import com.company.icps.claim.repository.ClaimSpecifications;
+import com.company.icps.claim.dto.ClaimSearchRequest;
+import com.company.icps.audit.service.AuditService;
 import com.company.icps.common.exception.InvalidStateTransitionException;
 import com.company.icps.common.exception.ResourceNotFoundException;
 import com.company.icps.user.entity.User;
@@ -22,6 +25,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Set;
 
+import com.company.icps.user.entity.Role;
+
 import static com.company.icps.claim.entity.ClaimStatus.*;
 
 @Service
@@ -30,6 +35,7 @@ public class ClaimService {
 
     private final ClaimRepository claimRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     // Valid state transitions: from → set of allowed targets
     private static final Map<ClaimStatus, Set<ClaimStatus>> VALID_TRANSITIONS = Map.of(
@@ -60,7 +66,9 @@ public class ClaimService {
                 .customer(customer)
                 .build();
 
-        return toResponse(claimRepository.save(claim));
+        Claim savedClaim = claimRepository.save(claim);
+        auditService.log(customer, savedClaim, "CLAIM_CREATED", null, DRAFT, "Claim created as a draft");
+        return toResponse(savedClaim);
     }
 
     @Transactional(readOnly = true)
@@ -135,6 +143,18 @@ public class ClaimService {
         return claimRepository.findByStatus(status, pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ClaimResponse> searchClaims(ClaimSearchRequest request, String email, Pageable pageable) {
+        User user = getUserByEmail(email);
+        var specification = ClaimSpecifications.matching(request);
+        if (user.getRole() == Role.CUSTOMER) {
+            specification = specification.and(ClaimSpecifications.ownedBy(user.getId()));
+        } else if (user.getRole() == Role.CLAIM_AGENT || user.getRole() == Role.INVESTIGATOR) {
+            specification = specification.and(ClaimSpecifications.assignedTo(user.getId()));
+        }
+        return claimRepository.findAll(specification, pageable).map(this::toResponse);
+    }
+
     // ---- Helpers ----
 
     public Claim getClaimEntity(Long claimId) {
@@ -151,7 +171,9 @@ public class ClaimService {
         }
 
         claim.setStatus(targetStatus);
-        return toResponse(claimRepository.save(claim));
+        Claim savedClaim = claimRepository.save(claim);
+        auditService.log(actor, savedClaim, actionFor(targetStatus), currentStatus, targetStatus, notes);
+        return toResponse(savedClaim);
     }
 
     private void validateOwnership(Claim claim, String email) {
@@ -180,7 +202,7 @@ public class ClaimService {
 
     // ---- Mapping ----
 
-    private ClaimResponse toResponse(Claim claim) {
+    public ClaimResponse toResponse(Claim claim) {
         User customer = claim.getCustomer();
         User agent = claim.getAssignedAgent();
         return ClaimResponse.builder()
@@ -200,5 +222,19 @@ public class ClaimService {
                 .createdAt(claim.getCreatedAt())
                 .updatedAt(claim.getUpdatedAt())
                 .build();
+    }
+
+    private String actionFor(ClaimStatus targetStatus) {
+        return switch (targetStatus) {
+            case SUBMITTED -> "CLAIM_SUBMITTED";
+            case APPROVED -> "CLAIM_APPROVED";
+            case REJECTED -> "CLAIM_REJECTED";
+            case UNDER_REVIEW -> "CLAIM_REVIEW_STARTED";
+            case INVESTIGATION_REQUIRED -> "INVESTIGATION_REQUESTED";
+            case UNDER_INVESTIGATION -> "INVESTIGATION_STARTED";
+            case INVESTIGATION_COMPLETED -> "INVESTIGATION_COMPLETED";
+            case CLOSED -> "CLAIM_CLOSED";
+            default -> "CLAIM_STATUS_CHANGED";
+        };
     }
 }

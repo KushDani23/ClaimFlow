@@ -1,0 +1,5 @@
+import { Link } from 'react-router-dom'; import { Button, Card } from '@/components/ui';
+export function UnauthorizedPage() { return <Centered title="Access restricted" message="Your current role does not have permission to view this page." action="Return to dashboard" to="/dashboard" />; }
+export function NotFoundPage() { return <Centered title="Page not found" message="The page you are looking for does not exist or has moved." action="Return to dashboard" to="/dashboard" />; }
+export function ErrorPage() { return <Centered title="Something went wrong" message="Please return to your dashboard and try again." action="Return to dashboard" to="/dashboard" />; }
+function Centered({ title, message, action, to }: { title: string; message: string; action: string; to: string }) { return <main className="grid min-h-screen place-items-center bg-mist p-5"><Card className="max-w-md p-8 text-center"><h1 className="text-2xl font-bold text-ink">{title}</h1><p className="mt-3 text-sm leading-6 text-slate-500">{message}</p><Link className="mt-6 inline-block" to={to}><Button>{action}</Button></Link></Card></main>; }

@@ -10,6 +10,7 @@ import com.company.icps.document.entity.ClaimDocument;
 import com.company.icps.document.repository.DocumentRepository;
 import com.company.icps.user.entity.User;
 import com.company.icps.user.repository.UserRepository;
+import com.company.icps.audit.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +29,7 @@ public class DocumentService {
     private final FileStorageService fileStorageService;
     private final ClaimService claimService;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     @Transactional
     public DocumentResponse uploadDocument(Long claimId, MultipartFile file, String email) {
@@ -51,7 +53,10 @@ public class DocumentService {
                 .uploadedBy(uploader)
                 .build();
 
-        return toResponse(documentRepository.save(document));
+        ClaimDocument savedDocument = documentRepository.save(document);
+        auditService.log(uploader, claim, "DOCUMENT_UPLOADED", claim.getStatus(), claim.getStatus(),
+                "Uploaded document: " + savedDocument.getFileName());
+        return toResponse(savedDocument);
     }
 
     @Transactional(readOnly = true)
