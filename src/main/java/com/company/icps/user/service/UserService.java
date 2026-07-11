@@ -26,6 +26,7 @@ public class UserService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .enabled(user.isEnabled())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

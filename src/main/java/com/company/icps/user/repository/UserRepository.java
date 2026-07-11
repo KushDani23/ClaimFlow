@@ -1,5 +1,6 @@
 package com.company.icps.user.repository;
 
+import com.company.icps.user.entity.Role;
 import com.company.icps.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    long countByRole(Role role);
 }

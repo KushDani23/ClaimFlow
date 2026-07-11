@@ -1,6 +1,7 @@
 com\company\icps\common\response\ApiResponse$ApiResponseBuilder.class
 com\company\icps\common\response\ApiResponse.class
 com\company\icps\user\entity\User.class
+com\company\icps\admin\service\AdminService.class
 com\company\icps\claim\entity\ClaimType.class
 com\company\icps\common\exception\DuplicateResourceException.class
 com\company\icps\claim\dto\CreateClaimRequest$CreateClaimRequestBuilder.class
@@ -22,6 +23,8 @@ com\company\icps\config\SwaggerConfig.class
 com\company\icps\authentication\dto\AuthResponse$AuthResponseBuilder.class
 com\company\icps\document\entity\ClaimDocument.class
 com\company\icps\config\SecurityConfig.class
+com\company\icps\admin\dto\DashboardStatsResponse$DashboardStatsResponseBuilder.class
+com\company\icps\admin\dto\DashboardStatsResponse.class
 com\company\icps\security\JwtAuthenticationFilter.class
 com\company\icps\claim\repository\ClaimRepository.class
 com\company\icps\InsuranceClaimApplication.class
@@ -34,12 +37,14 @@ com\company\icps\common\exception\InvalidStateTransitionException.class
 com\company\icps\document\repository\DocumentRepository.class
 com\company\icps\authentication\dto\LoginRequest.class
 com\company\icps\claim\dto\ClaimResponse.class
+com\company\icps\admin\controller\AdminController.class
 com\company\icps\user\service\UserService.class
 com\company\icps\authentication\service\AuthService.class
 com\company\icps\claim\controller\ClaimController.class
 com\company\icps\claim\service\ClaimService.class
 com\company\icps\config\JwtConfig.class
 com\company\icps\user\dto\UserProfileResponse$UserProfileResponseBuilder.class
+com\company\icps\admin\dto\UpdateRoleRequest.class
 com\company\icps\document\service\FileStorageService.class
 com\company\icps\document\service\DocumentService.class
 com\company\icps\authentication\dto\RegisterRequest.class
