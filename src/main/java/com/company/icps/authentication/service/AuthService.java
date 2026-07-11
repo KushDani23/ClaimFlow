@@ -24,17 +24,12 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    /**
-     * Register a new user with CUSTOMER role by default.
-     */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("User", "email", request.getEmail());
         }
 
-        // Build and save the user
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -44,39 +39,23 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-
-        // Generate JWT token
-        String token = jwtService.generateToken(user);
-
-        return AuthResponse.builder()
-                .token(token)
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .build();
+        return buildAuthResponse(user);
     }
 
-    /**
-     * Authenticate an existing user and return a JWT token.
-     */
     public AuthResponse login(LoginRequest request) {
-        // Authenticate with Spring Security — throws BadCredentialsException on failure
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        // Load the user and generate token
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
-        String token = jwtService.generateToken(user);
+        return buildAuthResponse(user);
+    }
 
+    private AuthResponse buildAuthResponse(User user) {
         return AuthResponse.builder()
-                .token(token)
+                .token(jwtService.generateToken(user))
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .firstName(user.getFirstName())
