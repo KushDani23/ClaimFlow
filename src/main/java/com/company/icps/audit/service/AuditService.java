@@ -47,7 +47,10 @@ public class AuditService {
         boolean ownsClaim = claim.getCustomer().getId().equals(requester.getId());
         boolean handlesClaim = claim.getAssignedAgent() != null
                 && claim.getAssignedAgent().getId().equals(requester.getId());
-        boolean privileged = requester.getRole() == Role.ADMIN || requester.getRole() == Role.SUPERVISOR;
+        boolean privileged = requester.getRole() == Role.ADMIN
+                || requester.getRole() == Role.SUPERVISOR
+                || requester.getRole() == Role.INVESTIGATOR
+                || requester.getRole() == Role.CLAIM_AGENT;
         if (!ownsClaim && !handlesClaim && !privileged) {
             throw new AccessDeniedException("You do not have permission to view this claim timeline");
         }

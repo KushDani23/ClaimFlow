@@ -10,6 +10,7 @@ import com.company.icps.document.repository.DocumentRepository;
 import com.company.icps.user.entity.Role;
 import com.company.icps.user.entity.User;
 import com.company.icps.user.repository.UserRepository;
+import com.company.icps.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +33,7 @@ class DocumentServiceTest {
     @Mock private ClaimService claimService;
     @Mock private UserRepository userRepository;
     @Mock private AuditService auditService;
+    @Mock private NotificationService notificationService;
     @InjectMocks private DocumentService documentService;
 
     @Test

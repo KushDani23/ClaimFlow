@@ -4,20 +4,33 @@ spring:
 
   # PostgreSQL Configuration
   datasource:
-    url: jdbc:postgresql://localhost:5432/icps_db
-    username: postgres
-    password: 12345
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/icps_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:12345}
     driver-class-name: org.postgresql.Driver
+
+  # Mail Configuration (Mock SMTP)
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.mailtrap.io}
+    port: ${SPRING_MAIL_PORT:2525}
+    username: ${SPRING_MAIL_USERNAME:mock_user}
+    password: ${SPRING_MAIL_PASSWORD:mock_password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
   # JPA / Hibernate Configuration
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   # File Upload Configuration
   servlet:
@@ -42,8 +55,14 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operations-sorter: method
+    try-it-out-enabled: true
 
 # File Storage Configuration
 file:
   upload-dir: ./uploads
 
+# Logging
+logging:
+  level:
+    com.company.icps: INFO
+    org.springframework.security: WARN

@@ -63,9 +63,9 @@ public class ClaimController {
         return ResponseEntity.ok(ApiResponse.success("Claims retrieved successfully", claims));
     }
 
-    @Operation(summary = "Get claim by ID", description = "Returns a specific claim owned by the authenticated customer")
+    @Operation(summary = "Get claim by ID", description = "Customers see only their own claims; agents and supervisors can view any claim")
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'CLAIM_AGENT', 'INVESTIGATOR', 'SUPERVISOR', 'ADMIN')")
     public ResponseEntity<ApiResponse<ClaimResponse>> getClaimById(
             @PathVariable Long id,
             Authentication authentication

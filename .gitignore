@@ -19,6 +19,20 @@ target/
 .DS_Store
 Thumbs.db
 
-# Environment variables
+# Environment variables and configurations
 .env
+.env.local
+.env.*.local
 application-local.properties
+application-local.yml
+
+# Uploaded attachments
+uploads/
+
+# DB Scratch files containing passwords
+*DB.java
+*DB.class
+
+# Frontend dependencies and builds
+frontend/node_modules/
+frontend/dist/

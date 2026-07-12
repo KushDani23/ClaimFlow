@@ -8,6 +8,7 @@ import com.company.icps.claim.entity.ClaimType;
 import com.company.icps.claim.repository.ClaimRepository;
 import com.company.icps.user.entity.Role;
 import com.company.icps.user.entity.User;
+import com.company.icps.notification.service.NotificationService;
 import com.company.icps.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,7 @@ class ClaimServiceTest {
     @Mock private ClaimRepository claimRepository;
     @Mock private UserRepository userRepository;
     @Mock private AuditService auditService;
+    @Mock private NotificationService notificationService;
     @InjectMocks private ClaimService claimService;
 
     @Test

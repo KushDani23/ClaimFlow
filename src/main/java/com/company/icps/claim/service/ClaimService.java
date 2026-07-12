@@ -9,6 +9,7 @@ import com.company.icps.claim.repository.ClaimRepository;
 import com.company.icps.claim.repository.ClaimSpecifications;
 import com.company.icps.claim.dto.ClaimSearchRequest;
 import com.company.icps.audit.service.AuditService;
+import com.company.icps.notification.service.NotificationService;
 import com.company.icps.common.exception.InvalidStateTransitionException;
 import com.company.icps.common.exception.ResourceNotFoundException;
 import com.company.icps.user.entity.User;
@@ -36,6 +37,7 @@ public class ClaimService {
     private final ClaimRepository claimRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final NotificationService notificationService;
 
     // Valid state transitions: from → set of allowed targets
     private static final Map<ClaimStatus, Set<ClaimStatus>> VALID_TRANSITIONS = Map.of(
@@ -74,7 +76,11 @@ public class ClaimService {
     @Transactional(readOnly = true)
     public ClaimResponse getClaimById(Long claimId, String email) {
         Claim claim = getClaimEntity(claimId);
-        validateOwnership(claim, email);
+        User requester = getUserByEmail(email);
+        // Customers can only view their own claims; staff can view any
+        if (requester.getRole() == Role.CUSTOMER) {
+            validateOwnership(claim, email);
+        }
         return toResponse(claim);
     }
 
@@ -111,7 +117,8 @@ public class ClaimService {
     public ClaimResponse submitClaim(Long claimId, String email) {
         Claim claim = getClaimEntity(claimId);
         validateOwnership(claim, email);
-        return transitionClaim(claim, SUBMITTED, null, null);
+        User customer = getUserByEmail(email);
+        return transitionClaim(claim, SUBMITTED, "Customer submitted the claim", customer);
     }
 
     // ---- Workflow Operations (Agent / Investigator / Supervisor) ----
@@ -173,6 +180,20 @@ public class ClaimService {
         claim.setStatus(targetStatus);
         Claim savedClaim = claimRepository.save(claim);
         auditService.log(actor, savedClaim, actionFor(targetStatus), currentStatus, targetStatus, notes);
+        
+        // Notify Customer
+        String subject = "Claim Status Updated: " + savedClaim.getClaimNumber();
+        String message = String.format("Your claim %s is now %s. %s", 
+                savedClaim.getClaimNumber(), targetStatus.name(), notes != null ? notes : "");
+        notificationService.notifyUser(savedClaim.getCustomer(), message, subject);
+        
+        // Notify Agent if assigned and actor is not the agent
+        if (savedClaim.getAssignedAgent() != null && !savedClaim.getAssignedAgent().getId().equals(actor.getId())) {
+            String agentMsg = String.format("Claim %s you are assigned to is now %s.", 
+                    savedClaim.getClaimNumber(), targetStatus.name());
+            notificationService.notifyUser(savedClaim.getAssignedAgent(), agentMsg, subject);
+        }
+
         return toResponse(savedClaim);
     }
 
