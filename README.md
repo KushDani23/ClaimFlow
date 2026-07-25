@@ -1,4 +1,4 @@
-# Enterprise Insurance Claim Processing System (ICPS)
+# Claim Flow | Enterprise Insurance Claim Processing System (ICPS)
 
 ICPS is a state-of-the-art, secure web application designed to handle the complete lifecycle of insurance claims. Built with a robust Java/Spring Boot backend and a modern React/TypeScript/Vite frontend, the system facilitates seamless claim submission, role-based workflows, strict state transition validation, local document management, and comprehensive audit trails.
 
