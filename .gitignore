@@ -36,3 +36,5 @@ uploads/
 # Frontend dependencies and builds
 frontend/node_modules/
 frontend/dist/
+.git/
+uploads/
