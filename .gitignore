@@ -29,9 +29,10 @@ application-local.yml
 # Uploaded attachments
 uploads/
 
-# DB Scratch files containing passwords
+# DB Scratch files containing passwords — never commit these
 *DB.java
 *DB.class
+**/config/DatabaseSeeder.java
 
 # Frontend dependencies and builds
 frontend/node_modules/
