@@ -47,6 +47,7 @@ D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\controller\Documen
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\dto\DocumentResponse.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\entity\ClaimDocument.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\repository\DocumentRepository.java
+D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\service\DocumentDataMigration.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\service\DocumentService.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\document\service\FileStorageService.java
 D:\Personal\ClaimFlow\src\main\java\com\company\icps\InsuranceClaimApplication.java

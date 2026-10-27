@@ -34,8 +34,23 @@ public class ClaimDocument {
     @Column(nullable = false)
     private Long fileSize;
 
-    @Column(nullable = false)
+    /**
+     * Legacy column: stores the filesystem path used before BYTEA storage was introduced.
+     * Kept nullable so that pre-existing rows (which have a path but no BYTEA data) are
+     * not broken by the schema update.  New uploads set this to an empty string.
+     */
+    @Column(nullable = true)
     private String filePath;
+
+    /**
+     * Actual file bytes stored in PostgreSQL as BYTEA.
+     * New uploads always populate this column.
+     * Legacy rows uploaded before this change will have this field null;
+     * the retrieval path falls back to the filesystem for those rows.
+     */
+    @Lob
+    @Column(name = "file_data", columnDefinition = "bytea")
+    private byte[] fileData;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "claim_id", nullable = false)

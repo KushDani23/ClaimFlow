@@ -6,9 +6,14 @@ const client = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL ?? 'htt
 client.interceptors.request.use((config) => { const token = localStorage.getItem('icps_token'); if (token) config.headers.Authorization = `Bearer ${token}`; return config; });
 client.interceptors.response.use((response) => response, (error: AxiosError<ApiResponse<unknown>>) => {
   const status = error.response?.status;
-  if (status === 401) { localStorage.removeItem('icps_session'); localStorage.removeItem('icps_token'); if (location.pathname !== '/login') location.assign('/login'); }
+  const isAuthRequest = error.config?.url?.includes('/auth/login');
+  if (status === 401 && !isAuthRequest) {
+    localStorage.removeItem('icps_session');
+    localStorage.removeItem('icps_token');
+    if (location.pathname !== '/login') location.assign('/login');
+  }
   const message = error.response?.data?.message ?? (error.code === 'ECONNABORTED' ? 'The request timed out. Please try again.' : 'Unable to reach the server. Please try again.');
-  if (status !== 401) toast.error(message);
+  if (status !== 401 && !isAuthRequest) toast.error(message);
   return Promise.reject(error);
 });
 export default client;
