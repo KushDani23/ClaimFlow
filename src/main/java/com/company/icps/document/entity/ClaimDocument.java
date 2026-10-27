@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -48,7 +50,7 @@ public class ClaimDocument {
      * Legacy rows uploaded before this change will have this field null;
      * the retrieval path falls back to the filesystem for those rows.
      */
-    @Lob
+    @JdbcTypeCode(SqlTypes.VARBINARY)
     @Column(name = "file_data", columnDefinition = "bytea")
     private byte[] fileData;
 
