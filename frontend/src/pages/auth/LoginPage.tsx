@@ -66,7 +66,7 @@ function InvalidCredentialsModal({ countdown, onClose }: { countdown: number; on
           <div className="flex-1">
             <h3 className="text-lg font-bold text-red-800">Invalid credentials</h3>
             <p className="mt-1 text-sm font-medium text-red-600">
-              Invalid credentials -&gt; you are not authorized.
+              Invalid credentials.
             </p>
             <div className="mt-4 flex items-center justify-between rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
               <span>Closing automatically in:</span>
@@ -193,6 +193,12 @@ export function LoginPage() {
     setAlertStage('IDLE');
   };
 
+  const handleInvalid = () => {
+    toast.error('Invalid credentials');
+    setCountdown(3);
+    setAlertStage('STAGE1');
+  };
+
   const submit = async (data: FormData) => {
     try {
       const session = await login(data.email, data.password);
@@ -200,7 +206,9 @@ export function LoginPage() {
       // Verify that user's actual role matches the chosen role in the dropdown
       if (session.role !== selectedRole) {
         logout();
-        toast.error(`Unauthorized: Your account role is ${session.role}, not ${selectedRole}. Please select your registered role.`);
+        toast.error('Invalid credentials');
+        setCountdown(3);
+        setAlertStage('STAGE1');
         return;
       }
 
@@ -212,7 +220,7 @@ export function LoginPage() {
         navigate(fromPath, { replace: true });
       } else {
         if (session.role === 'ADMIN') {
-          navigate('/admin/claims', { replace: true });
+          navigate('/dashboard', { replace: true });
         } else if (session.role === 'CUSTOMER') {
           navigate('/dashboard', { replace: true });
         } else {
@@ -222,6 +230,7 @@ export function LoginPage() {
     } catch (err: unknown) {
       // Wrong credentials or user does not exist in DB:
       // Show Alert 1 for 3 seconds, then automatically transition to Alert 2 with dummy credentials
+      toast.error('Invalid credentials');
       setCountdown(3);
       setAlertStage('STAGE1');
     }
@@ -234,7 +243,7 @@ export function LoginPage() {
       {alertStage === 'STAGE1' && (
         <InvalidCredentialsModal
           countdown={countdown}
-          onClose={() => setAlertStage('STAGE2')}
+          onClose={() => setAlertStage('IDLE')}
         />
       )}
 
@@ -247,7 +256,7 @@ export function LoginPage() {
       )}
 
       <AuthShell title="Welcome back" subtitle="Sign in to continue to ClaimFlow">
-        <form className="space-y-4" onSubmit={handleSubmit(submit)}>
+        <form className="space-y-4" onSubmit={handleSubmit(submit, handleInvalid)}>
           <div>
             <label htmlFor="role-select" className="block text-sm font-medium text-slate-700 mb-1.5">
               I am logging in as…

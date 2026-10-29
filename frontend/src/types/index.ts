@@ -9,5 +9,45 @@ export interface UserProfile { id: number; firstName: string; lastName: string; 
 export interface Claim { id: number; claimNumber: string; claimType: ClaimType; status: ClaimStatus; description: string; incidentDate: string; claimAmount: number; policyNumber: string; customerName: string; customerEmail: string; assignedAgent: string | null; agentNotes: string | null; investigationNotes: string | null; createdAt: string; updatedAt: string; }
 export interface ClaimPayload { claimType: ClaimType; description: string; incidentDate: string; claimAmount: number; policyNumber: string; }
 export interface DocumentItem { id: number; fileName: string; fileType: string; fileSize: number; claimId: number; claimNumber: string; uploadedBy: string; uploadedAt: string; }
-export interface DashboardStats { totalUsers: number; totalClaims: number; claimsByStatus: Partial<Record<ClaimStatus, number>>; }
+export interface UserClaimStat {
+  userId: number;
+  name: string;
+  email: string;
+  role: Role;
+  totalClaims: number;
+  approvedClaims: number;
+  rejectedClaims: number;
+  pendingClaims: number;
+  totalAmount: number;
+  approvedAmount: number;
+  rejectedAmount: number;
+}
+
+export interface ClaimTypeStat {
+  type: string;
+  totalClaims: number;
+  approvedClaims: number;
+  rejectedClaims: number;
+  totalAmount: number;
+  approvedAmount: number;
+}
+
+export interface DashboardStats {
+  totalUsers: number;
+  totalClaims: number;
+  approvedClaims?: number;
+  rejectedClaims?: number;
+  settledClaims?: number;
+  pendingClaims?: number;
+  totalClaimAmount?: number;
+  approvedAmount?: number;
+  rejectedAmount?: number;
+  settledAmount?: number;
+  pendingAmount?: number;
+  approvalRate?: number;
+  rejectionRate?: number;
+  claimsByStatus: Partial<Record<ClaimStatus, number>>;
+  claimsByType?: ClaimTypeStat[];
+  userStats?: UserClaimStat[];
+}
 export interface UserSession { token: string; email: string; role: Role; firstName: string; lastName: string; }
