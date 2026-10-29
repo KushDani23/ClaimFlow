@@ -10,6 +10,7 @@ import com.company.icps.document.repository.DocumentRepository;
 import com.company.icps.user.entity.Role;
 import com.company.icps.user.entity.User;
 import com.company.icps.user.repository.UserRepository;
+import com.company.icps.document.dto.ClaimDocumentSummary;
 import com.company.icps.notification.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,8 +48,6 @@ class DocumentServiceTest {
         MockMultipartFile file = new MockMultipartFile("file", "evidence.pdf", "application/pdf", "test".getBytes());
         when(claimService.getClaimEntity(5L)).thenReturn(claim);
         when(userRepository.findByEmail(customer.getEmail())).thenReturn(Optional.of(customer));
-        when(fileStorageService.storeFile(file)).thenReturn("stored-evidence.pdf");
-        when(fileStorageService.getFilePath("stored-evidence.pdf")).thenReturn("uploads/stored-evidence.pdf");
         when(documentRepository.save(any(ClaimDocument.class))).thenAnswer(invocation -> {
             ClaimDocument document = invocation.getArgument(0);
             document.setId(7L);
@@ -60,5 +59,27 @@ class DocumentServiceTest {
         assertEquals("evidence.pdf", response.getFileName());
         verify(auditService).log(customer, claim, "DOCUMENT_UPLOADED", ClaimStatus.DRAFT, ClaimStatus.DRAFT,
                 "Uploaded document: evidence.pdf");
+    }
+
+    @Test
+    void getByClaimIdReturnsLightweightSummaries() {
+        User customer = User.builder().id(1L).email("customer@icps.test").role(Role.CUSTOMER).build();
+        Claim claim = Claim.builder().id(5L).claimNumber("CLM-5").customer(customer).build();
+
+        ClaimDocumentSummary summary = new ClaimDocumentSummary(
+                10L, "report.pdf", "stored-uuid.pdf", "application/pdf", 1024L, "",
+                5L, "CLM-5", "customer@icps.test", java.time.LocalDateTime.now()
+        );
+
+        when(claimService.getClaimEntity(5L)).thenReturn(claim);
+        when(userRepository.findByEmail(customer.getEmail())).thenReturn(Optional.of(customer));
+        when(documentRepository.findSummaryByClaimId(5L)).thenReturn(java.util.List.of(summary));
+
+        var results = documentService.getDocumentsByClaimId(5L, customer.getEmail());
+
+        assertEquals(1, results.size());
+        assertEquals("report.pdf", results.get(0).getFileName());
+        assertEquals("CLM-5", results.get(0).getClaimNumber());
+        assertEquals("customer@icps.test", results.get(0).getUploadedBy());
     }
 }

@@ -10,21 +10,26 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
  * One-time startup migration that backfills the {@code file_data} (BYTEA) column for
  * legacy {@code claim_documents} rows that were uploaded before the BYTEA storage change.
  *
- * <p>For each document where {@code file_data IS NULL} and a {@code file_path} is recorded,
- * this bean attempts to read the file from the filesystem and store the bytes in the DB.
- * This is idempotent: documents that already have {@code file_data} populated are skipped.
+ * <h3>How it works</h3>
+ * <ol>
+ *   <li>A <em>narrow</em> native query fetches only {@code (id, stored_file_name, file_name)}
+ *       for rows where {@code file_data IS NULL}.  File bytes are <strong>not</strong> loaded
+ *       in this pass, so the startup check is cheap even when many large documents already
+ *       live in the table.</li>
+ *   <li>For each un-migrated row the full entity is loaded individually (via
+ *       {@code findById}), the bytes are read from the filesystem through
+ *       {@link FileStorageService}, and the entity is saved back with the BYTEA column
+ *       populated.</li>
+ * </ol>
  *
- * <p>This component is safe to keep in production — after all legacy rows are migrated it
- * becomes a no-op (the query returns zero rows).
+ * <p>This component is idempotent — once all rows have {@code file_data} populated the
+ * initial query returns zero rows and the bean becomes a no-op on subsequent startups.
  */
 @Slf4j
 @Component
@@ -37,39 +42,50 @@ public class DocumentDataMigration {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void migrateFilesystemDocumentsToDatabase() {
-        List<ClaimDocument> legacyDocs = documentRepository.findAll().stream()
-                .filter(d -> d.getFileData() == null || d.getFileData().length == 0)
-                .filter(d -> d.getStoredFileName() != null && !d.getStoredFileName().isBlank())
-                .toList();
+        // Cheap narrow query — does NOT load file_data bytes
+        List<Object[]> missingRows = documentRepository.findRowsMissingFileData();
 
-        if (legacyDocs.isEmpty()) {
-            log.info("[DocumentDataMigration] No legacy filesystem documents to migrate.");
+        if (missingRows.isEmpty()) {
+            log.info("[DocumentDataMigration] All documents already have BYTEA data. Nothing to migrate.");
             return;
         }
 
         log.info("[DocumentDataMigration] Found {} legacy document(s) without BYTEA data. Migrating…",
-                legacyDocs.size());
+                missingRows.size());
 
         int migrated = 0;
         int failed = 0;
 
-        for (ClaimDocument doc : legacyDocs) {
+        for (Object[] row : missingRows) {
+            Long id = ((Number) row[0]).longValue();
+            String storedFileName = (String) row[1];
+            String fileName = (String) row[2];
+
             try {
+                // Load the full entity only for rows that actually need migration
+                ClaimDocument doc = documentRepository.findById(id).orElse(null);
+                if (doc == null) {
+                    log.warn("[DocumentDataMigration] Document id={} disappeared between check and load — skipping", id);
+                    continue;
+                }
+
                 org.springframework.core.io.Resource resource =
-                        fileStorageService.loadFile(doc.getStoredFileName());
+                        fileStorageService.loadFile(storedFileName);
                 byte[] bytes = resource.getContentAsByteArray();
+
                 doc.setFileData(bytes);
-                doc.setFilePath(""); // clear the absolute path after migrating
+                doc.setFilePath(""); // clear absolute filesystem path after migrating
                 documentRepository.save(doc);
                 migrated++;
                 log.info("[DocumentDataMigration] Migrated document id={} name={} ({} bytes)",
-                        doc.getId(), doc.getFileName(), bytes.length);
+                        id, fileName, bytes.length);
+
             } catch (IOException | com.company.icps.common.exception.FileUploadException e) {
                 failed++;
-                log.warn("[DocumentDataMigration] Could not migrate document id={} name={}: {} — " +
-                        "the file may be missing. It will still be served via filesystem fallback " +
-                        "until the file is re-uploaded.",
-                        doc.getId(), doc.getFileName(), e.getMessage());
+                log.warn("[DocumentDataMigration] Could not migrate document id={} name='{}': {} — " +
+                        "file may be missing from the filesystem. It will be served via filesystem " +
+                        "fallback if the file still exists, or will return an error if deleted.",
+                        id, fileName, e.getMessage());
             }
         }
 

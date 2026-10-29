@@ -40,6 +40,10 @@ export const documentService = {
   /**
    * Opens the document inline in a new browser tab (PDF preview, image viewer, etc.)
    * The blob URL is revoked after the tab has had time to load the content.
+   *
+   * NOTE: `noopener`/`noreferrer` are intentionally omitted from window.open — those
+   * flags cause all browsers to return null from window.open, making popup-blocker
+   * detection impossible.  Blob URLs are same-origin, so omitting noopener is safe here.
    */
   view: async (id: number) => {
     // ?inline=true tells the backend to send Content-Disposition: inline
@@ -48,15 +52,15 @@ export const documentService = {
     });
     const blob = response.data as Blob;
     const url = URL.createObjectURL(blob);
-    const tab = window.open(url, '_blank', 'noopener,noreferrer');
-    // Revoke the object URL after enough time for the new tab to load the content.
-    // If the tab is blocked by a pop-up blocker, inform the user.
+    const tab = window.open(url, '_blank');
+    // Revoke after 30 s — enough time for the tab to load the content.
+    // The PDF viewer retains the bytes in memory even after the object URL is revoked.
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
     if (!tab) {
-      URL.revokeObjectURL(url);
+      // window.open returns null only when blocked by the browser
       throw new Error(
         'Pop-up blocked. Please allow pop-ups for this site and try again.',
       );
     }
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
   },
 };

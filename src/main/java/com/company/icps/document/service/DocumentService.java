@@ -5,6 +5,7 @@ import com.company.icps.claim.service.ClaimService;
 import com.company.icps.common.constants.AppConstants;
 import com.company.icps.common.exception.FileUploadException;
 import com.company.icps.common.exception.ResourceNotFoundException;
+import com.company.icps.document.dto.ClaimDocumentSummary;
 import com.company.icps.document.dto.DocumentResponse;
 import com.company.icps.document.entity.ClaimDocument;
 import com.company.icps.document.repository.DocumentRepository;
@@ -158,7 +159,11 @@ public class DocumentService {
         Claim claim = claimService.getClaimEntity(claimId);
         User requester = getUser(email);
         validateClaimAccess(claim, requester);
-        return documentRepository.findByClaimId(claimId).stream().map(this::toResponse).toList();
+        // findSummaryByClaimId uses a JPQL constructor expression that excludes
+        // the file_data BYTEA column — file bytes are never loaded just to list documents.
+        return documentRepository.findSummaryByClaimId(claimId).stream()
+                .map(this::summaryToResponse)
+                .toList();
     }
 
     // ── Delete ────────────────────────────────────────────────────────────────
@@ -232,6 +237,7 @@ public class DocumentService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
     }
 
+    /** Maps the full entity (used after upload to build the 201 response). */
     private DocumentResponse toResponse(ClaimDocument document) {
         return DocumentResponse.builder()
                 .id(document.getId())
@@ -242,6 +248,20 @@ public class DocumentService {
                 .claimNumber(document.getClaim().getClaimNumber())
                 .uploadedBy(document.getUploadedBy().getEmail())
                 .uploadedAt(document.getCreatedAt())
+                .build();
+    }
+
+    /** Maps the lightweight projection (used for listing — file bytes never loaded). */
+    private DocumentResponse summaryToResponse(ClaimDocumentSummary s) {
+        return DocumentResponse.builder()
+                .id(s.id())
+                .fileName(s.fileName())
+                .fileType(s.fileType())
+                .fileSize(s.fileSize())
+                .claimId(s.claimId())
+                .claimNumber(s.claimNumber())
+                .uploadedBy(s.uploadedByEmail())
+                .uploadedAt(s.createdAt())
                 .build();
     }
 
